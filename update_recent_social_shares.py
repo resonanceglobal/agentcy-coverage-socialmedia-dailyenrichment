@@ -24,7 +24,7 @@ import urllib.parse
 import json
 from datetime import datetime, timedelta
 import psycopg
-from psycopg.extras import RealDictCursor
+from psycopg.rows import RealDictRow
 
 # Database connection from environment
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -36,7 +36,7 @@ if not DATABASE_URL:
 def connect_db():
     """Connect to database using environment variable"""
     try:
-        return psycopg2.connect(DATABASE_URL)
+        return psycopg.connect(DATABASE_URL)
     except Exception as e:
         print(f"❌ Database connection failed: {e}")
         sys.exit(1)
@@ -103,7 +103,7 @@ class RecentSocialSharesUpdater:
         print(f"🔍 Querying for coverage published in the past {self.days_back} days...")
 
         conn = connect_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur = conn.cursor(row_factory=RealDictRow)
 
         try:
             # Calculate cutoff date
