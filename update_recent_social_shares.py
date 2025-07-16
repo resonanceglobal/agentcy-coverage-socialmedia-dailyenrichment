@@ -23,8 +23,8 @@ import http.client
 import urllib.parse
 import json
 from datetime import datetime, timedelta
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.extras import RealDictCursor
 
 # Database connection from environment
 DATABASE_URL = os.environ.get("DATABASE_URL")
