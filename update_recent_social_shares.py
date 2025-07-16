@@ -24,7 +24,7 @@ import urllib.parse
 import json
 from datetime import datetime, timedelta
 import psycopg
-from psycopg.rows import RealDictRow
+from psycopg.rows import dict_row
 
 # Database connection from environment
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -103,7 +103,7 @@ class RecentSocialSharesUpdater:
         print(f"🔍 Querying for coverage published in the past {self.days_back} days...")
 
         conn = connect_db()
-        cur = conn.cursor(row_factory=RealDictRow)
+        cur = conn.cursor(row_factory=dict_row)
 
         try:
             # Calculate cutoff date
