@@ -196,8 +196,14 @@ class RecentSocialSharesUpdater:
                     print(f"   📈 Engagement changed: {old_total:,} → {total_engagement:,} "
                           f"({'+' if total_engagement > old_total else ''}{total_engagement - old_total:,})")
                 else:
-                    print(f"   ⏸️  No change in engagement metrics")
-                    self.unchanged += 1
+                    print(f"   ⏸️  No change in engagement metrics - updating timestamp only")
+                    # Still update the timestamp even if metrics haven't changed
+                    if self.update_timestamp_only(record['id']):
+                        print(f"   ✅ Timestamp updated successfully")
+                        self.unchanged += 1
+                    else:
+                        print(f"   ❌ Failed to update timestamp")
+                        self.failed += 1
                     return
 
             # Save to database
@@ -337,6 +343,29 @@ class RecentSocialSharesUpdater:
                 'replies': 0,
                 'retweets': 0
             }
+
+    def update_timestamp_only(self, coverage_id):
+        """Update only the timestamp for unchanged records"""
+        conn = connect_db()
+        cur = conn.cursor()
+
+        try:
+            cur.execute("""
+                UPDATE agentcy_client_coverage_social_shares
+                SET updated_at = NOW()
+                WHERE coverage_id = %s
+            """, (coverage_id,))
+
+            conn.commit()
+            return True
+
+        except Exception as e:
+            print(f"   ❌ Database error updating timestamp: {e}")
+            conn.rollback()
+            return False
+        finally:
+            cur.close()
+            conn.close()
 
     def save_social_data(self, coverage_id, x_data, facebook_data, reddit_count,
                          pinterest_count, total_engagement, update_existing=False):
